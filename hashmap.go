@@ -104,7 +104,7 @@ func (m *HashMap[Key, Value]) Set(key Key, value Value) error {
 
 func (m *HashMap[Key, Value]) SetInsert(key Key, value Value) {
 	err := m.Set(key, value)
-	if err == nil {
+	if err != nil {
 		m.Insert(key, value)
 	}
 }
