@@ -36,11 +36,11 @@ func (m *HashMap[Key, Value]) Init(cap uint) *HashMap[Key, Value] {
 	return m
 }
 
-func (m *HashMap[Key, Value]) Insert(key Key, value Value) {
+func (m *HashMap[Key, Value]) Insert(key Key, value Value) bool {
 	if m.size >= m.extendLimit {
 		m.Extend()
 	}
-	m._Insert(key, value)
+	return m._Insert(key, value)
 }
 
 func (m *HashMap[Key, Value]) Extend() {
@@ -62,20 +62,23 @@ func (m *HashMap[Key, Value]) Extend() {
 	}
 }
 
-func (m *HashMap[Key, Value]) _Insert(key Key, value Value) error {
+func (m *HashMap[Key, Value]) _Insert(key Key, value Value) bool {
 	slot := key.Hash() % m.cap
 	var i uint = 0
 	for ; i < m.cap; i++ {
+		if m.keys[slot] == key {
+			return false
+		}
 		if !m.occupied[slot] {
 			m.keys[slot] = key
 			m.values[slot] = value
 			m.occupied[slot] = true
 			m.size++
-			return nil
+			return true
 		}
 		slot = (slot + 1) % m.cap
 	}
-	return errors.New("could not insert key")
+	return false
 }
 
 func (m *HashMap[Key, Value]) Get(key Key) (Value, error) {
@@ -172,6 +175,7 @@ func a() {
 	m.Insert("e", 299)
 	m.Insert("f", 444)
 	m.Set("a", 150)
+	m.Insert("a", 233)
 	m.Pop("e")
 	m.Print()
 }
