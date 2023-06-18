@@ -16,10 +16,14 @@ type Key interface {
 	comparable
 }
 
+type Bucket[K Key, Value any] struct {
+	key      K
+	value    Value
+	occupied bool
+}
+
 type HashMap[key Key, value any] struct {
-	keys        []key
-	values      []value
-	occupied    []bool
+	buckets     []Bucket[key, value]
 	size        uint
 	cap         uint
 	extendLimit uint
@@ -30,9 +34,7 @@ func (m *HashMap[Key, Value]) Init(cap uint) *HashMap[Key, Value] {
 	m.extendLimit = cap / 2
 	m.cap = cap
 
-	m.keys = make([]Key, cap)
-	m.values = make([]Value, cap)
-	m.occupied = make([]bool, cap)
+	m.buckets = make([]Bucket[Key, Value], cap)
 	return m
 }
 
@@ -44,20 +46,16 @@ func (m *HashMap[Key, Value]) Insert(key Key, value Value) bool {
 }
 
 func (m *HashMap[Key, Value]) Extend() {
-	keys := m.keys
-	values := m.values
-	occupied := m.occupied
+	buckets := m.buckets
 
 	m.size = 0
 	m.extendLimit = m.cap + 1
 	m.cap = (m.cap + 1) * 2
-	m.keys = make([]Key, m.cap)
-	m.values = make([]Value, m.cap)
-	m.occupied = make([]bool, m.cap)
+	m.buckets = make([]Bucket[Key, Value], m.cap)
 
-	for keyIndex, key := range keys {
-		if occupied[keyIndex] {
-			m._Insert(key, values[keyIndex])
+	for _, bucket := range buckets {
+		if bucket.occupied {
+			m._Insert(bucket.key, bucket.value)
 		}
 	}
 }
@@ -66,13 +64,11 @@ func (m *HashMap[Key, Value]) _Insert(key Key, value Value) bool {
 	slot := key.Hash() % m.cap
 	var i uint = 0
 	for ; i < m.cap; i++ {
-		if m.keys[slot] == key {
+		if m.buckets[slot].key == key {
 			return false
 		}
-		if !m.occupied[slot] {
-			m.keys[slot] = key
-			m.values[slot] = value
-			m.occupied[slot] = true
+		if !m.buckets[slot].occupied {
+			m.buckets[slot] = Bucket[Key, Value]{key, value, true}
 			m.size++
 			return true
 		}
@@ -84,7 +80,7 @@ func (m *HashMap[Key, Value]) _Insert(key Key, value Value) bool {
 func (m *HashMap[Key, Value]) Get(key Key) (Value, error) {
 	slot, err := m._FindSlot(key)
 	if err == nil {
-		return m.values[slot], nil
+		return m.buckets[slot].value, nil
 	}
 	return *new(Value), errors.New("key not found")
 }
@@ -100,7 +96,7 @@ func (m *HashMap[Key, Value]) GetDefault(key Key, def Value) Value {
 func (m *HashMap[Key, Value]) Set(key Key, value Value) error {
 	slot, err := m._FindSlot(key)
 	if err == nil {
-		m.values[slot] = value
+		m.buckets[slot].value = value
 		return nil
 	}
 	return err
@@ -116,8 +112,9 @@ func (m *HashMap[Key, Value]) SetInsert(key Key, value Value) {
 func (m *HashMap[Key, Value]) Pop(key Key) (Value, error) {
 	slot, err := m._FindSlot(key)
 	if err == nil {
-		value := m.values[slot]
-		m.occupied[slot] = false
+		value := m.buckets[slot].value
+		m.buckets[slot].occupied = false
+		m.size--
 		return value, nil
 	}
 	return *new(Value), errors.New("could not pop item, since it was not present")
@@ -132,11 +129,11 @@ func (m *HashMap[Key, Value]) _FindSlot(key Key) (uint, error) {
 	slot := key.Hash() % m.cap
 	var i uint = 0
 	for ; i < m.cap; i++ {
-		if !m.occupied[slot] {
+		if !m.buckets[slot].occupied {
 			return 0, errors.New("key not found")
 		}
 
-		if m.keys[slot] == key {
+		if m.buckets[slot].key == key {
 			return slot, nil
 		}
 
@@ -146,9 +143,9 @@ func (m *HashMap[Key, Value]) _FindSlot(key Key) (uint, error) {
 }
 
 func (m *HashMap[Key, Value]) Print() {
-	for keyIndex, key := range m.keys {
-		if m.occupied[keyIndex] {
-			fmt.Printf("%+v: %+v \n", key, m.values[keyIndex])
+	for _, bucket := range m.buckets {
+		if bucket.occupied {
+			fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
 		}
 	}
 }
