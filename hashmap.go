@@ -31,7 +31,7 @@ type HashMap[key Key, value any] struct {
 
 func (m *HashMap[Key, Value]) Init(cap uint) *HashMap[Key, Value] {
 	m.size = 0
-	m.extendLimit = cap / 2
+	m.extendLimit = (cap / 3) * 2
 	m.cap = cap
 
 	m.buckets = make([]Bucket[Key, Value], cap)
@@ -49,8 +49,8 @@ func (m *HashMap[Key, Value]) Extend() {
 	buckets := m.buckets
 
 	m.size = 0
-	m.extendLimit = m.cap + 1
 	m.cap = (m.cap + 1) * 2
+	m.extendLimit = (m.cap / 3) * 2
 	m.buckets = make([]Bucket[Key, Value], m.cap)
 
 	for _, bucket := range buckets {
@@ -126,9 +126,9 @@ func (m *HashMap[Key, Value]) Contains(key Key) bool {
 }
 
 func (m *HashMap[Key, Value]) _FindSlot(key Key) (uint, error) {
-	slot := key.Hash() % m.cap
-	var i uint = 0
-	for ; i < m.cap; i++ {
+	hash := key.Hash()
+	slot := hash % m.cap
+	for {
 		if !m.buckets[slot].occupied {
 			return 0, errors.New("key not found")
 		}
@@ -137,15 +137,25 @@ func (m *HashMap[Key, Value]) _FindSlot(key Key) (uint, error) {
 			return slot, nil
 		}
 
-		slot = (slot + 1) % m.cap
+		slot = (slot*5 + 1 + hash) % m.cap
+		hash >>= 5
 	}
-	return 0, errors.New("key not found")
 }
 
 func (m *HashMap[Key, Value]) Print() {
 	for _, bucket := range m.buckets {
 		if bucket.occupied {
 			fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
+		}
+	}
+}
+
+func (m *HashMap[Key, Value]) FullPrint() {
+	for _, bucket := range m.buckets {
+		if bucket.occupied {
+			fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
+		} else {
+			fmt.Println("[X]")
 		}
 	}
 }
@@ -165,14 +175,14 @@ func djb2(bytes []byte) uint {
 
 func a() {
 	m := new(HashMap[String, int]).Init(5)
-	m.Insert("a", 5)
-	m.Insert("b", 3)
-	m.Insert("c", 55)
-	m.Insert("d", 100)
-	m.Insert("e", 299)
-	m.Insert("f", 444)
-	m.Set("a", 150)
-	m.Insert("a", 233)
-	m.Pop("e")
-	m.Print()
+	m.Insert("hello", 5)
+	m.Insert("bye", 3)
+	m.Insert("coosl", 55)
+	m.Insert("dddd", 100)
+	m.Insert("esdfg", 299)
+	m.Insert("fsss", 444)
+	m.Set("hello", 150)
+	m.Insert("bye", 233)
+	m.Pop("dddd")
+	m.FullPrint()
 }
