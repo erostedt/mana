@@ -68,3 +68,6 @@ func (t *Trie) FindTail(word []Ascii) (TrieNode, error) {
 	}
 	return node, nil
 }
+
+func (t *Trie) Print() {
+}

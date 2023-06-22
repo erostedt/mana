@@ -1,3 +1,3 @@
-module yarn
+module mana
 
 go 1.20
