@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type Ascii byte
@@ -58,6 +59,25 @@ func (t *Trie) Contains(word []Ascii) bool {
 func (t *Trie) StartsWith(word []Ascii) bool {
 	_, err := t.FindTail(word)
 	return err == nil
+}
+
+func (t *Trie) PrintSuggestions(word []Ascii) {
+	tail, err := t.FindTail(word)
+	if err == nil {
+		tail.RecPrintSuggestion(word)
+	}
+}
+
+func (t *TrieNode) RecPrintSuggestion(base []Ascii) {
+	iter := t.children.CreateIterator()
+	for iter.HasNext() {
+		node := iter.Next()
+		word := strings.Join([]string{string(base), string(node.value.ascii)}, "")
+		if node.value.isTerminal {
+			fmt.Println(word)
+		}
+		node.value.RecPrintSuggestion([]Ascii(word))
+	}
 }
 
 func (t *Trie) FindTail(word []Ascii) (*TrieNode, error) {

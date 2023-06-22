@@ -54,5 +54,7 @@ func main() {
 	for _, animal := range animals {
 		trie.Insert([]Ascii(animal))
 	}
-	trie.Print()
+	trie.PrintSuggestions([]Ascii("Pe"))
+	//trie.Print()
+
 }

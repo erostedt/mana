@@ -16,7 +16,6 @@ Peacock
 Sloth
 Raccoon
 Penguin
-Kangaroo
 Cheetah
 Rhino
 Koala
