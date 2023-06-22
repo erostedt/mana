@@ -1,5 +1,9 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Ascii byte
 
 func (ascii Ascii) Hash() uint {
@@ -8,12 +12,12 @@ func (ascii Ascii) Hash() uint {
 
 type TrieNode struct {
 	ascii      Ascii
-	children   HashMap[Ascii, TrieNode]
+	children   HashMap[Ascii, *TrieNode]
 	isTerminal bool
 }
 
 type Trie struct {
-	root TrieNode
+	root *TrieNode
 	cap  uint
 }
 
@@ -21,25 +25,24 @@ func NewNode(ascii Ascii, isTerminal bool, cap uint) *TrieNode {
 	node := new(TrieNode)
 	node.ascii = ascii
 	node.isTerminal = isTerminal
-	node.children = *new(HashMap[Ascii, TrieNode]).Init(cap)
+	node.children = *new(HashMap[Ascii, *TrieNode]).Init(cap)
 	return node
 }
 
 func (t *Trie) Init(cap uint) *Trie {
-	t.root = *NewNode(0, false, cap)
+	t.root = NewNode(0, false, cap)
 	t.cap = cap
 	return t
 }
 
 func (t *Trie) Insert(word []Ascii) {
 	node := t.root
-
 	for _, ascii := range word {
 		n, err := node.children.Get(ascii)
 		if err == nil {
 			node = n
 		} else {
-			newNode := *NewNode(ascii, false, t.cap)
+			newNode := NewNode(ascii, false, t.cap)
 			node.children.Insert(ascii, newNode)
 			node = newNode
 		}
@@ -57,7 +60,7 @@ func (t *Trie) StartsWith(word []Ascii) bool {
 	return err == nil
 }
 
-func (t *Trie) FindTail(word []Ascii) (TrieNode, error) {
+func (t *Trie) FindTail(word []Ascii) (*TrieNode, error) {
 	node := t.root
 	for _, ascii := range word {
 		n, err := node.children.Get(ascii)
@@ -70,4 +73,14 @@ func (t *Trie) FindTail(word []Ascii) (TrieNode, error) {
 }
 
 func (t *Trie) Print() {
+	t.root.RecPrint()
+}
+
+func (t *TrieNode) RecPrint() {
+	iterator := t.children.CreateIterator()
+	for iterator.HasNext() {
+		bucket := iterator.Next()
+		fmt.Println(string(bucket.key))
+		bucket.value.RecPrint()
+	}
 }

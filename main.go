@@ -42,7 +42,6 @@ func main() {
 		fmt.Println(match.word)
 	}
 	a()
-
 	data, err := os.ReadFile("animals.txt")
 
 	if err != nil {
@@ -55,4 +54,5 @@ func main() {
 	for _, animal := range animals {
 		trie.Insert([]Ascii(animal))
 	}
+	trie.Print()
 }

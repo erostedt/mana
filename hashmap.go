@@ -7,6 +7,11 @@ import (
 
 type String string
 
+type ForwardIterable[T any] interface {
+	HasNext() bool
+	Next() *T
+}
+
 type Hashable interface {
 	Hash() uint
 }
@@ -16,17 +21,24 @@ type Key interface {
 	comparable
 }
 
-type Bucket[K Key, Value any] struct {
+type Bucket[K Key, V any] struct {
 	key      K
-	value    Value
+	value    V
 	occupied bool
 }
 
-type HashMap[key Key, value any] struct {
-	buckets     []Bucket[key, value]
+type HashMap[K Key, V any] struct {
+	buckets     []Bucket[K, V]
 	size        uint
 	cap         uint
 	extendLimit uint
+}
+
+type HashMapIterator[key Key, value any] struct {
+	buckets           []Bucket[key, value]
+	currentIndex      uint
+	numVisitedBuckets uint
+	numFilledBuckets  uint
 }
 
 func (m *HashMap[Key, Value]) Init(cap uint) *HashMap[Key, Value] {
@@ -160,6 +172,32 @@ func (m *HashMap[Key, Value]) FullPrint() {
 	}
 }
 
+func (m *HashMap[Key, Value]) CreateIterator() HashMapIterator[Key, Value] {
+	return HashMapIterator[Key, Value]{
+		m.buckets,
+		0,
+		0,
+		m.size,
+	}
+}
+
+func (i *HashMapIterator[Key, Value]) HasNext() bool {
+	return i.numVisitedBuckets < i.numFilledBuckets
+}
+
+func (i *HashMapIterator[Key, Value]) Next() *Bucket[Key, Value] {
+	if i.HasNext() {
+		for !i.buckets[i.currentIndex].occupied {
+			i.currentIndex++
+		}
+		bucket := &i.buckets[i.currentIndex]
+		i.currentIndex++
+		i.numVisitedBuckets++
+		return bucket
+	}
+	return nil
+}
+
 func (s String) Hash() uint {
 	return djb2([]byte(s))
 }
@@ -184,5 +222,10 @@ func a() {
 	m.Set("hello", 150)
 	m.Insert("bye", 233)
 	m.Pop("dddd")
-	m.FullPrint()
+
+	i := m.CreateIterator()
+	for i.HasNext() {
+		bucket := i.Next()
+		fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
+	}
 }
