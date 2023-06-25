@@ -13,9 +13,9 @@ func Min(a int, b int, c int) int {
 	return min
 }
 
-func levenstein(asciiSlice1 []byte, asciiSlice2 []byte) ([]int, int, int) {
-	m := len(asciiSlice1)
-	n := len(asciiSlice2)
+func levenstein(word1 []rune, word2 []rune) ([]int, int, int) {
+	m := len(word1)
+	n := len(word2)
 	dp := make([]int, (m+1)*(n+1))
 
 	dp[0] = 0
@@ -30,7 +30,7 @@ func levenstein(asciiSlice1 []byte, asciiSlice2 []byte) ([]int, int, int) {
 	substitutionCost := 0
 	for i := 1; i < m+1; i++ {
 		for j := 1; j < n+1; j++ {
-			if asciiSlice1[i-1] == asciiSlice2[j-1] {
+			if word1[i-1] == word2[j-1] {
 				substitutionCost = 0
 			} else {
 				substitutionCost = 1

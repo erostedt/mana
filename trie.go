@@ -5,15 +5,16 @@ import (
 	"strings"
 )
 
-type Ascii byte
+type Rune rune
 
-func (ascii Ascii) Hash() uint {
-	return uint(ascii)
+func (char Rune) Hash() uint {
+	// TODO: FIXME
+	return uint(char)
 }
 
 type TrieNode struct {
-	ascii      Ascii
-	children   HashMap[Ascii, *TrieNode]
+	char       Rune
+	children   Dict[Rune, *TrieNode]
 	isTerminal bool
 }
 
@@ -22,68 +23,71 @@ type Trie struct {
 	cap  uint
 }
 
-func NewNode(ascii Ascii, isTerminal bool, cap uint) *TrieNode {
+func NewNode(char Rune, isTerminal bool, cap uint) *TrieNode {
 	node := new(TrieNode)
-	node.ascii = ascii
+	node.char = char
 	node.isTerminal = isTerminal
-	node.children = *new(HashMap[Ascii, *TrieNode]).Init(cap)
+	node.children = MakeDict[Rune, *TrieNode](cap)
 	return node
 }
 
-func (t *Trie) Init(cap uint) *Trie {
-	t.root = NewNode(0, false, cap)
-	t.cap = cap
-	return t
+func NewTrie(cap uint) *Trie {
+	t := MakeTrie(cap)
+	return &t
 }
 
-func (t *Trie) Insert(word []Ascii) {
+func MakeTrie(cap uint) Trie {
+	return Trie{root: NewNode(0, false, cap), cap: cap}
+}
+
+func (t *Trie) Insert(word []Rune) {
 	node := t.root
-	for _, ascii := range word {
-		n, err := node.children.Get(ascii)
+	for _, char := range word {
+		n, err := node.children.Get(char)
 		if err == nil {
 			node = n
 		} else {
-			newNode := NewNode(ascii, false, t.cap)
-			node.children.Insert(ascii, newNode)
+			newNode := NewNode(char, false, t.cap)
+			node.children.Insert(char, newNode)
 			node = newNode
 		}
 	}
 	node.isTerminal = true
 }
 
-func (t *Trie) Contains(word []Ascii) bool {
+func (t *Trie) Contains(word []Rune) bool {
 	node, err := t.FindTail(word)
 	return err == nil && node.isTerminal
 }
 
-func (t *Trie) StartsWith(word []Ascii) bool {
+func (t *Trie) StartsWith(word []Rune) bool {
 	_, err := t.FindTail(word)
 	return err == nil
 }
 
-func (t *Trie) PrintSuggestions(word []Ascii) {
+func (t *Trie) PrintSuggestions(word []Rune) {
 	tail, err := t.FindTail(word)
 	if err == nil {
 		tail.RecPrintSuggestion(word)
 	}
 }
 
-func (t *TrieNode) RecPrintSuggestion(base []Ascii) {
+func (t *TrieNode) RecPrintSuggestion(base []Rune) {
 	iter := t.children.CreateIterator()
 	for iter.HasNext() {
 		node := iter.Next()
-		word := strings.Join([]string{string(base), string(node.value.ascii)}, "")
+		word := strings.Join([]string{string(base), string(node.value.char)}, "")
 		if node.value.isTerminal {
 			fmt.Println(word)
 		}
-		node.value.RecPrintSuggestion([]Ascii(word))
+		node.value.RecPrintSuggestion([]Rune(word))
 	}
 }
 
-func (t *Trie) FindTail(word []Ascii) (*TrieNode, error) {
+func (t *Trie) FindTail(word []Rune) (*TrieNode, error) {
 	node := t.root
-	for _, ascii := range word {
-		n, err := node.children.Get(ascii)
+	for _, char := range word {
+		n, err := node.children.Get(char)
 		if err != nil {
 			return n, err
 		}

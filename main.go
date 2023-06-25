@@ -14,19 +14,19 @@ type Match struct {
 
 func main() {
 
-	dictionary := [][]byte{
-		[]byte("hello"),
-		[]byte("yellow"),
+	dictionary := [][]rune{
+		[]rune("hello"),
+		[]rune("yellow"),
+		[]rune("testtest"),
 	}
 
-	queryWord := "hello"
-	asciiSlice := []byte(queryWord)
+	queryWord := []rune("hello")
 
 	closestWords := []Match{}
 	limit := 3
 	for _, word := range dictionary {
 
-		dp, m, n := levenstein(word, asciiSlice)
+		dp, m, n := levenstein(word, queryWord)
 		if dp[m*n-1] > limit {
 			continue
 		}
@@ -41,7 +41,6 @@ func main() {
 	for _, match := range closestWords {
 		fmt.Println(match.word)
 	}
-	a()
 	data, err := os.ReadFile("animals.txt")
 
 	if err != nil {
@@ -49,12 +48,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	trie := new(Trie).Init(5)
+	trie := NewTrie(5)
 	animals := strings.Split(string(data), "\n")
 	for _, animal := range animals {
-		trie.Insert([]Ascii(animal))
+		trie.Insert([]Rune(animal))
 	}
-	trie.PrintSuggestions([]Ascii("Pe"))
-	//trie.Print()
-
+	trie.PrintSuggestions([]Rune("Pe"))
 }
