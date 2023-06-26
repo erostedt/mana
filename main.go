@@ -51,7 +51,8 @@ func main() {
 	trie := NewTrie(5)
 	animals := strings.Split(string(data), "\n")
 	for _, animal := range animals {
-		trie.Insert([]Rune(animal))
+		trie.Insert(animal)
 	}
-	trie.PrintSuggestions([]Rune("Pe"))
+	trie.PrintSuggestions("Pe")
+	ABC()
 }
