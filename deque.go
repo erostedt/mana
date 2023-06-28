@@ -61,6 +61,28 @@ func (q *Deque[T]) PopFirst() (data T, err error) {
 	return data, nil
 }
 
+func (q *Deque[T]) PopLast() (data T, err error) {
+	if q.count == 0 {
+		return data, errors.New("Deque is empty")
+	}
+
+	if q.count == 1 {
+		data = q.head.data
+		q.head = nil
+		q.count--
+		return data, nil
+	}
+
+	q.count--
+	data = q.tail.data
+	q.tail.prev.next = nil
+	return data, nil
+}
+
+func (q *Deque[T]) IsEmpty() bool {
+	return q.count == 0
+}
+
 func (q *Deque[T]) PrintDeque() {
 	node := q.head
 	if node == nil {

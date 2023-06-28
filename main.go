@@ -53,6 +53,8 @@ func main() {
 	for _, animal := range animals {
 		trie.Insert(animal)
 	}
-	trie.PrintSuggestions("Pe")
+
+	fmt.Println(trie.Autocomplete("Pe", 3))
+	//trie.Print()
 	ABC()
 }

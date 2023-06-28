@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 )
 
@@ -25,8 +24,9 @@ type Trie struct {
 	cap  uint
 }
 
-func NewNode(char Rune, parent *TrieNode, isTerminal bool, cap uint) *TrieNode {
+func newNode(char Rune, parent *TrieNode, isTerminal bool, cap uint) *TrieNode {
 	node := new(TrieNode)
+	node.parent = parent
 	node.char = char
 	node.isTerminal = isTerminal
 	node.children = MakeDict[Rune, *TrieNode](cap)
@@ -39,7 +39,7 @@ func NewTrie(cap uint) *Trie {
 }
 
 func MakeTrie(cap uint) Trie {
-	return Trie{root: NewNode(0, nil, false, cap), cap: cap}
+	return Trie{root: newNode(0, nil, false, cap), cap: cap}
 }
 
 func (t *Trie) Insert(word string) {
@@ -50,7 +50,7 @@ func (t *Trie) Insert(word string) {
 		if err == nil {
 			node = n
 		} else {
-			newNode := NewNode(lowercased, node, false, t.cap)
+			newNode := newNode(lowercased, node, false, t.cap)
 			node.children.Insert(lowercased, newNode)
 			node = newNode
 		}
@@ -59,56 +59,32 @@ func (t *Trie) Insert(word string) {
 }
 
 func (t *Trie) Contains(word string) bool {
-	node, err := t.FindTail(word)
+	node, err := t.findTail(word)
 	return err == nil && node.isTerminal
 }
 
 func (t *Trie) StartsWith(word string) bool {
-	_, err := t.FindTail(word)
+	_, err := t.findTail(word)
 	return err == nil
 }
 
-func (t *Trie) PrintSuggestions(word string) {
-	tail, err := t.FindTail(word)
+func (t *Trie) Autocomplete(base string, maxSuggestions int) []string {
+	tail, err := t.findTail(base)
+
 	if err == nil {
-		tail.RecPrintSuggestion(word)
-	}
-}
-
-func (t *TrieNode) RecPrintSuggestion(base string) {
-	iter := t.children.CreateIterator()
-	for iter.HasNext() {
-		node := iter.Next()
-		word := strings.Join([]string{base, string(node.value.char)}, "")
-		if node.value.isTerminal {
-			fmt.Println(word)
+		words := tail.bfs(maxSuggestions)
+		for i := 0; i < len(words); i++ {
+			words[i] = base + words[i]
 		}
-		node.value.RecPrintSuggestion(word)
+		return words
 	}
-}
-
-func (t *Trie) Autocomplete(base string) []string {
-	// Finish me
-	maxSuggestions := 3
-	options := make([]string, 0, maxSuggestions)
-	tail, err := t.FindTail(base)
-
-	if err != nil {
-		if tail.isTerminal {
-			options = append(options, tail.Backtrack())
-		}
-		tailOptions := tail.bfs(maxSuggestions - len(options))
-		options = append(options, tailOptions...)
-	}
-
-	//BackTrack
-	return options
+	return make([]string, 0)
 }
 
 func (root *TrieNode) bfs(maxLimit int) []string {
 	queue := MakeDeque[*TrieNode]()
 	queue.AddLast(root)
-	words := make([]string, 0)
+	words := make([]string, 0, maxLimit)
 
 	for len(words) < maxLimit {
 		node, err := queue.PopFirst()
@@ -117,7 +93,7 @@ func (root *TrieNode) bfs(maxLimit int) []string {
 		}
 
 		if node.isTerminal {
-			words = append(words, node.Backtrack())
+			words = append(words, node.backtrack(root))
 		}
 
 		iter := node.children.CreateIterator()
@@ -126,22 +102,21 @@ func (root *TrieNode) bfs(maxLimit int) []string {
 			queue.AddLast(bucket.value)
 		}
 	}
-
 	return words
 }
 
-func (t *TrieNode) Backtrack() string {
+func (t *TrieNode) backtrack(tail *TrieNode) string {
 	word := make([]rune, 0)
 	node := t
-	for node != nil {
+	for node != tail {
 		word = append(word, rune(node.char))
 		node = node.parent
 	}
-	Reverse[rune](word)
+	reverse[rune](word)
 	return string(word)
 }
 
-func Reverse[T any](slice []T) {
+func reverse[T any](slice []T) {
 	length := len(slice)
 	for forwardIndex := 0; forwardIndex < length/2; forwardIndex++ {
 		backwardIndex := length - forwardIndex - 1
@@ -151,7 +126,7 @@ func Reverse[T any](slice []T) {
 	}
 }
 
-func (t *Trie) FindTail(word string) (*TrieNode, error) {
+func (t *Trie) findTail(word string) (*TrieNode, error) {
 	node := t.root
 	for _, char := range word {
 		lowercased := Rune(unicode.ToLower(char))
@@ -165,14 +140,14 @@ func (t *Trie) FindTail(word string) (*TrieNode, error) {
 }
 
 func (t *Trie) Print() {
-	t.root.RecPrint()
+	t.root.recPrint()
 }
 
-func (t *TrieNode) RecPrint() {
+func (t *TrieNode) recPrint() {
 	iterator := t.children.CreateIterator()
 	for iterator.HasNext() {
 		bucket := iterator.Next()
 		fmt.Println(string(bucket.key))
-		bucket.value.RecPrint()
+		bucket.value.recPrint()
 	}
 }
