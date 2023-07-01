@@ -96,17 +96,3 @@ func (q *Deque[T]) PrintDeque() {
 	}
 	fmt.Println(node.data)
 }
-
-func ABC() {
-	q := MakeDeque[int]()
-	q.AddLast(1)
-	q.AddLast(2)
-	q.AddLast(3)
-
-	q.PrintDeque()
-
-	q.PopFirst()
-	q.PopFirst()
-
-	q.PrintDeque()
-}
