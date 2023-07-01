@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+func (s String) Hash() uint {
+	return djb2([]byte(s))
+}
+
 func TestDict(t *testing.T) {
 	m := MakeDict[String, int](5)
 	m.Insert("hello", 5)

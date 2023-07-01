@@ -203,10 +203,6 @@ func (i *DictIterator[K, V]) Next() *Bucket[K, V] {
 	return nil
 }
 
-func (s String) Hash() uint {
-	return djb2([]byte(s))
-}
-
 func djb2(bytes []byte) uint {
 	var hash uint = 5381
 
