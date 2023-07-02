@@ -2,5 +2,5 @@ TODO:
 Add licence.
 Add info in this readme file.
 Add graphviz.
-Add tests.
+Add tests. - in progress
 Add simple way to run the project.

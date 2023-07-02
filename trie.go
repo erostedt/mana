@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 	"unicode"
 )
 
@@ -84,9 +85,19 @@ func (t *Trie) Autocomplete(base string, maxSuggestions int) []string {
 
 	if err == nil {
 		words := tail.bfs(maxSuggestions)
-		for i := 0; i < len(words); i++ {
-			words[i] = base + words[i]
+		var caseFunc func(string) string
+		if isCapitalCase(base) {
+			caseFunc = strings.ToUpper
+		} else if firstIsUpper(base) {
+			caseFunc = toTitleCase
+		} else {
+			caseFunc = strings.ToLower
 		}
+
+		for i := 0; i < len(words); i++ {
+			words[i] = caseFunc(base + words[i])
+		}
+
 		return words
 	}
 	return make([]string, 0)
@@ -161,4 +172,37 @@ func (t *TrieNode) recPrint() {
 		fmt.Println(string(bucket.key))
 		bucket.value.recPrint()
 	}
+}
+
+func firstIsUpper(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+
+	chars := []rune(s)
+
+	return unicode.IsUpper(chars[0])
+}
+
+func isCapitalCase(s string) bool {
+	if len(s) < 2 {
+		return false
+	}
+
+	chars := []rune(s)
+	for i := 0; i < len(chars); i++ {
+		if unicode.IsLower(chars[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func toTitleCase(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	chars := []rune(strings.ToLower(s))
+	chars[0] = unicode.ToUpper(chars[0])
+	return string(chars)
 }
