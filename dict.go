@@ -202,12 +202,3 @@ func (i *DictIterator[K, V]) Next() *Bucket[K, V] {
 	}
 	return nil
 }
-
-func djb2(bytes []byte) uint {
-	var hash uint = 5381
-
-	for _, c := range bytes {
-		hash = (((hash << 5) + hash) + uint(c))
-	}
-	return hash
-}

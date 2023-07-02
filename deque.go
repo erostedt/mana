@@ -50,6 +50,7 @@ func (q *Deque[T]) PopFirst() (data T, err error) {
 	if q.count == 1 {
 		data = q.head.data
 		q.head = nil
+		q.tail = nil
 		q.count--
 		return data, nil
 	}
@@ -69,6 +70,7 @@ func (q *Deque[T]) PopLast() (data T, err error) {
 	if q.count == 1 {
 		data = q.head.data
 		q.head = nil
+		q.tail = nil
 		q.count--
 		return data, nil
 	}
@@ -76,6 +78,7 @@ func (q *Deque[T]) PopLast() (data T, err error) {
 	q.count--
 	data = q.tail.data
 	q.tail.prev.next = nil
+	q.tail = q.tail.prev
 	return data, nil
 }
 

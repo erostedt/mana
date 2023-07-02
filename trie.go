@@ -1,15 +1,26 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 	"unicode"
 )
 
 type Rune rune
 
+func djb2(bytes []byte) uint {
+	var hash uint = 5381
+
+	for _, c := range bytes {
+		hash = (((hash << 5) + hash) + uint(c))
+	}
+	return hash
+}
+
 func (char Rune) Hash() uint {
-	// TODO: FIXME
-	return uint(char)
+	bytes := make([]byte, 4)
+	binary.BigEndian.PutUint32(bytes, uint32(char))
+	return djb2(bytes)
 }
 
 type TrieNode struct {
