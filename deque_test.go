@@ -42,4 +42,13 @@ func TestDequeAddAndRemove(t *testing.T) {
 		t.Error("Tail should be nil.")
 	}
 
+	q.AddFirst(4)
+	q.AddFirst(5)
+	if q.head.data != 5 {
+		t.Error("Head should be 5")
+	}
+
+	if q.head.next.data != 4 || q.tail.data != 4 {
+		t.Error("Tail should be 4")
+	}
 }

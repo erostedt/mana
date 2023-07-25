@@ -29,6 +29,18 @@ func NewDequeNode[T any](data T) *DequeNode[T] {
 	return node
 }
 
+func (q *Deque[T]) AddFirst(data T) {
+	node := NewDequeNode[T](data)
+	if q.head == nil {
+		q.head = node
+		q.tail = node
+	} else {
+		node.next = q.head
+		q.head = node
+		q.head.prev = q.head
+	}
+}
+
 func (q *Deque[T]) AddLast(data T) {
 	node := NewDequeNode[T](data)
 	if q.head == nil {
