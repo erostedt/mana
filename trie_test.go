@@ -8,7 +8,6 @@ import (
 
 func TestTrieComplete(t *testing.T) {
 	data, err := os.ReadFile("animals.txt")
-
 	if err != nil {
 		t.Error("Could not read file.")
 	}
