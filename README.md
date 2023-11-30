@@ -1,8 +1,3 @@
-TODO:
-Add licence.
-Add info in this readme file.
-Add graphviz.
-Add tests. - in progress
-Add simple way to run the project.
-change description on gh.
-fix punctuation stuff.
+# Intention
+
+This project is considered finished. It is just a simple educational project for learning some go.
