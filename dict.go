@@ -59,7 +59,7 @@ func (d *Dict[K, V]) Insert(key K, value V) bool {
 	if d.size >= d.extendLimit {
 		d.Extend()
 	}
-	return d._Insert(key, value)
+	return d.insert(key, value)
 }
 
 func (d *Dict[K, V]) Extend() {
@@ -72,12 +72,12 @@ func (d *Dict[K, V]) Extend() {
 
 	for _, bucket := range buckets {
 		if bucket.occupied {
-			d._Insert(bucket.key, bucket.value)
+			d.insert(bucket.key, bucket.value)
 		}
 	}
 }
 
-func (d *Dict[K, V]) _Insert(key K, value V) bool {
+func (d *Dict[K, V]) insert(key K, value V) bool {
 	slot := key.Hash() % d.cap
 	var i uint = 0
 	for ; i < d.cap; i++ {
@@ -95,7 +95,7 @@ func (d *Dict[K, V]) _Insert(key K, value V) bool {
 }
 
 func (d *Dict[K, V]) Get(key K) (V, error) {
-	slot, err := d._FindSlot(key)
+	slot, err := d.findSlot(key)
 	if err == nil {
 		return d.buckets[slot].value, nil
 	}
@@ -111,7 +111,7 @@ func (d *Dict[K, V]) GetDefault(key K, def V) V {
 }
 
 func (d *Dict[K, V]) Set(key K, value V) error {
-	slot, err := d._FindSlot(key)
+	slot, err := d.findSlot(key)
 	if err == nil {
 		d.buckets[slot].value = value
 		return nil
@@ -128,11 +128,11 @@ func (d *Dict[K, V]) SetInsert(key K, value V) {
 
 
 func (d *Dict[K, V]) Contains(key K) bool {
-	_, err := d._FindSlot(key)
+	_, err := d.findSlot(key)
 	return err == nil
 }
 
-func (d *Dict[K, V]) _FindSlot(key K) (uint, error) {
+func (d *Dict[K, V]) findSlot(key K) (uint, error) {
 	hash := key.Hash()
 	slot := hash % d.cap
 	for {

@@ -1,6 +1,6 @@
 package main
 
-func Min3(a int, b int, c int) int {
+func Min3i(a, b, c int) int {
 	min := a
 	if b < min {
 		min = b
@@ -34,7 +34,7 @@ func levenstein(word1 []rune, word2 []rune) int {
 				substitutionCost = 1
 			}
 
-			dp[i*n+j] = Min3(dp[(i-1)*n+j]+1, // deletion
+			dp[i*n+j] = Min3i(dp[(i-1)*n+j]+1, // deletion
 				dp[i*n+j-1]+1,                    // insertion
 				dp[(i-1)*n+j-1]+substitutionCost) // substitution
 
