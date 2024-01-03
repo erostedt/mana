@@ -126,16 +126,6 @@ func (d *Dict[K, V]) SetInsert(key K, value V) {
 	}
 }
 
-func (d *Dict[K, V]) Pop(key K) (V, error) {
-	slot, err := d._FindSlot(key)
-	if err == nil {
-		value := d.buckets[slot].value
-		d.buckets[slot].occupied = false
-		d.size--
-		return value, nil
-	}
-	return *new(V), errors.New("could not pop item, since it was not present")
-}
 
 func (d *Dict[K, V]) Contains(key K) bool {
 	_, err := d._FindSlot(key)
