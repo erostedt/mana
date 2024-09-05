@@ -21,10 +21,18 @@ type Key interface {
 	comparable
 }
 
+type BucketState int
+
+const (
+	BucketVacant BucketState = iota
+	BucketOccupied
+	BucketTombstone
+)
+
 type Bucket[K Key, V any] struct {
-	key      K
-	value    V
-	occupied bool
+	key   K
+	value V
+	state BucketState
 }
 
 type Dict[K Key, V any] struct {
@@ -71,7 +79,7 @@ func (d *Dict[K, V]) Extend() {
 	d.buckets = make([]Bucket[K, V], d.cap)
 
 	for _, bucket := range buckets {
-		if bucket.occupied {
+		if bucket.state == BucketOccupied {
 			d.insert(bucket.key, bucket.value)
 		}
 	}
@@ -84,8 +92,8 @@ func (d *Dict[K, V]) insert(key K, value V) bool {
 		if d.buckets[slot].key == key {
 			return false
 		}
-		if !d.buckets[slot].occupied {
-			d.buckets[slot] = Bucket[K, V]{key, value, true}
+		if d.buckets[slot].state != BucketOccupied {
+			d.buckets[slot] = Bucket[K, V]{key, value, BucketOccupied}
 			d.size++
 			return true
 		}
@@ -126,21 +134,31 @@ func (d *Dict[K, V]) SetInsert(key K, value V) {
 	}
 }
 
-
 func (d *Dict[K, V]) Contains(key K) bool {
 	_, err := d.findSlot(key)
 	return err == nil
+}
+
+func (d *Dict[K, V]) Pop(key K) (V, error) {
+	slot, err := d.findSlot(key)
+	if err != nil {
+		return *new(V), err
+	}
+	value := d.buckets[slot].value
+	d.buckets[slot].state = BucketTombstone
+	return value, nil
 }
 
 func (d *Dict[K, V]) findSlot(key K) (uint, error) {
 	hash := key.Hash()
 	slot := hash % d.cap
 	for {
-		if !d.buckets[slot].occupied {
+		bucket := d.buckets[slot]
+		if bucket.state == BucketVacant {
 			return 0, errors.New("key not found")
 		}
 
-		if d.buckets[slot].key == key {
+		if bucket.state == BucketOccupied && bucket.key == key {
 			return slot, nil
 		}
 
@@ -151,7 +169,7 @@ func (d *Dict[K, V]) findSlot(key K) (uint, error) {
 
 func (d *Dict[K, V]) Print() {
 	for _, bucket := range d.buckets {
-		if bucket.occupied {
+		if bucket.state == BucketOccupied {
 			fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
 		}
 	}
@@ -159,10 +177,16 @@ func (d *Dict[K, V]) Print() {
 
 func (d *Dict[K, V]) FullPrint() {
 	for _, bucket := range d.buckets {
-		if bucket.occupied {
+		switch bucket.state {
+		case BucketOccupied:
 			fmt.Printf("%+v: %+v \n", bucket.key, bucket.value)
-		} else {
-			fmt.Println("[X]")
+		case BucketVacant:
+			fmt.Println("[ ]")
+
+		case BucketTombstone:
+			fmt.Println("[T]")
+		default:
+			panic("Unexpected BucketState")
 		}
 	}
 }
@@ -182,7 +206,7 @@ func (i *DictIterator[K, V]) HasNext() bool {
 
 func (i *DictIterator[K, V]) Next() *Bucket[K, V] {
 	if i.HasNext() {
-		for !i.buckets[i.currentIndex].occupied {
+		for i.buckets[i.currentIndex].state != BucketOccupied {
 			i.currentIndex++
 		}
 		bucket := &i.buckets[i.currentIndex]

@@ -25,3 +25,43 @@ func TestDictInsertResize(t *testing.T) {
 		t.Errorf("Dict should have size of 12, had %d", d.cap)
 	}
 }
+
+func TestDictGet(t *testing.T) {
+	d := MakeDict[String, int](5)
+	d.Insert("a", 1)
+
+	_, err := d.Get("a")
+	if err != nil {
+		t.Error("Could not get a")
+	}
+}
+
+func TestDictPop(t *testing.T) {
+	d := MakeDict[String, int](5)
+	d.Insert("a", 1)
+	d.Insert("b", 2)
+
+	{
+		value, err := d.Pop("b")
+		if err != nil {
+			t.Error("Could not pop b")
+		}
+		t.Logf("Popped %d", value)
+	}
+	{
+		_, err := d.Pop("b")
+		if err == nil {
+			t.Error("Could pop b multiple times")
+		}
+	}
+	{
+		if d.Contains("b") {
+			t.Error("Should not contain b")
+		}
+		if !d.Contains("a") {
+			t.Error("Should contain a")
+		}
+
+	}
+
+}
