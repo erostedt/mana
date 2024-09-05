@@ -25,9 +25,9 @@ func (char Rune) Hash() uint {
 }
 
 type TrieNode struct {
-	char       Rune
 	parent     *TrieNode
 	children   Dict[Rune, *TrieNode]
+	char       Rune
 	isTerminal bool
 }
 
@@ -134,7 +134,7 @@ func (t *TrieNode) backtrack(tail *TrieNode) string {
 		word = append(word, rune(node.char))
 		node = node.parent
 	}
-	reverse[rune](word)
+	reverse(word)
 	return string(word)
 }
 
