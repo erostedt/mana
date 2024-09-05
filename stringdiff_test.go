@@ -22,7 +22,7 @@ func TestStringDiff(t *testing.T) {
 		if distance > limit {
 			continue
 		}
-		closestWords = append(closestWords, Match{distance, string(word)})
+		closestWords = append(closestWords, Match{string(word), distance})
 	}
 
 	sort.SliceStable(closestWords, func(i, j int) bool { return closestWords[i].distance < closestWords[j].distance })

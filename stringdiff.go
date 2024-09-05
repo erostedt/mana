@@ -45,6 +45,6 @@ func levenstein(word1 []rune, word2 []rune) int {
 }
 
 type Match struct {
-	distance int
 	word     string
+	distance int
 }
