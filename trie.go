@@ -33,25 +33,24 @@ type TrieNode struct {
 
 type Trie struct {
 	root *TrieNode
-	cap  uint
 }
 
-func newNode(char Rune, parent *TrieNode, isTerminal bool, cap uint) *TrieNode {
+func newNode(char Rune, parent *TrieNode, isTerminal bool) *TrieNode {
 	node := new(TrieNode)
 	node.parent = parent
 	node.char = char
 	node.isTerminal = isTerminal
-	node.children = MakeDict[Rune, *TrieNode](cap)
+	node.children = MakeDict[Rune, *TrieNode]()
 	return node
 }
 
-func NewTrie(cap uint) *Trie {
-	t := MakeTrie(cap)
+func NewTrie() *Trie {
+	t := MakeTrie()
 	return &t
 }
 
-func MakeTrie(cap uint) Trie {
-	return Trie{root: newNode(0, nil, false, cap), cap: cap}
+func MakeTrie() Trie {
+	return Trie{root: newNode(0, nil, false)}
 }
 
 func (t *Trie) Insert(word string) {
@@ -62,7 +61,7 @@ func (t *Trie) Insert(word string) {
 		if err == nil {
 			node = n
 		} else {
-			newNode := newNode(lowercased, node, false, t.cap)
+			newNode := newNode(lowercased, node, false)
 			node.children.Insert(lowercased, newNode)
 			node = newNode
 		}
@@ -83,24 +82,25 @@ func (t *Trie) StartsWith(word string) bool {
 func (t *Trie) Autocomplete(base string, maxSuggestions int) []string {
 	tail, err := t.findTail(base)
 
-	if err == nil {
-		words := tail.bfs(maxSuggestions)
-		var caseFunc func(string) string
-		if isCapitalCase(base) {
-			caseFunc = strings.ToUpper
-		} else if firstIsUpper(base) {
-			caseFunc = toTitleCase
-		} else {
-			caseFunc = strings.ToLower
-		}
+	if err != nil {
+        return make([]string, 0)
+    }
 
-		for i := 0; i < len(words); i++ {
-			words[i] = caseFunc(base + words[i])
-		}
+    words := tail.bfs(maxSuggestions)
+    var caseFunc func(string) string
+    if isCapitalCase(base) {
+        caseFunc = strings.ToUpper
+    } else if firstIsUpper(base) {
+        caseFunc = toTitleCase
+    } else {
+        caseFunc = strings.ToLower
+    }
 
-		return words
-	}
-	return make([]string, 0)
+    for i := 0; i < len(words); i++ {
+        words[i] = caseFunc(base + words[i])
+    }
+
+    return words
 }
 
 func (root *TrieNode) bfs(maxLimit int) []string {

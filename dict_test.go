@@ -9,25 +9,27 @@ func (s String) Hash() uint {
 }
 
 func TestDictInsertResize(t *testing.T) {
-	d := MakeDict[String, int](5)
+	d := MakeDict[String, int]()
 	d.Insert("a", 1)
 	d.Insert("b", 2)
 	d.Insert("c", 3)
 	d.Insert("d", 4)
 	d.Insert("e", 5)
 	d.Insert("f", 6)
+	d.Insert("g", 7)
+	d.Insert("h", 8)
+	d.Insert("i", 9)
 
-	if d.size != 6 {
+	if d.size != 9 {
 		t.Error("Dict should have size of 6.")
 	}
-
-	if d.cap != 12 {
-		t.Errorf("Dict should have size of 12, had %d", d.cap)
+	if d.cap != 18 {
+		t.Error("Dict should have cap of 18.")
 	}
 }
 
 func TestDictGet(t *testing.T) {
-	d := MakeDict[String, int](5)
+	d := MakeDict[String, int]()
 	d.Insert("a", 1)
 
 	_, err := d.Get("a")
@@ -37,7 +39,7 @@ func TestDictGet(t *testing.T) {
 }
 
 func TestDictPop(t *testing.T) {
-	d := MakeDict[String, int](5)
+	d := MakeDict[String, int]()
 	d.Insert("a", 1)
 	d.Insert("b", 2)
 
@@ -61,7 +63,5 @@ func TestDictPop(t *testing.T) {
 		if !d.Contains("a") {
 			t.Error("Should contain a")
 		}
-
 	}
-
 }

@@ -12,7 +12,7 @@ func TestTrieComplete(t *testing.T) {
 		t.Error("Could not read file.")
 	}
 
-	trie := NewTrie(5)
+	trie := NewTrie()
 	animals := strings.Split(string(data), "\n")
 	for _, animal := range animals {
 		trie.Insert(animal)

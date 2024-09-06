@@ -49,17 +49,18 @@ type DictIterator[K Key, V any] struct {
 	numFilledBuckets  uint
 }
 
-func NewDict[K Key, V any](cap uint) *Dict[K, V] {
-	d := MakeDict[K, V](cap)
+func NewDict[K Key, V any]() *Dict[K, V] {
+	d := MakeDict[K, V]()
 	return &d
 }
 
-func MakeDict[K Key, V any](cap uint) Dict[K, V] {
+func MakeDict[K Key, V any]() Dict[K, V] {
+    const INITIAL_CAPACITY uint = 8
 	return Dict[K, V]{
-		buckets:     make([]Bucket[K, V], cap),
+		buckets:     make([]Bucket[K, V], INITIAL_CAPACITY),
 		size:        0,
-		cap:         cap,
-		extendLimit: (cap / 3) * 2,
+		cap:         INITIAL_CAPACITY,
+		extendLimit: (INITIAL_CAPACITY / 3) * 2,
 	}
 }
 
@@ -205,14 +206,14 @@ func (i *DictIterator[K, V]) HasNext() bool {
 }
 
 func (i *DictIterator[K, V]) Next() *Bucket[K, V] {
-	if i.HasNext() {
-		for i.buckets[i.currentIndex].state != BucketOccupied {
-			i.currentIndex++
-		}
-		bucket := &i.buckets[i.currentIndex]
-		i.currentIndex++
-		i.numVisitedBuckets++
-		return bucket
-	}
-	return nil
+	if !i.HasNext() {
+        return nil;
+    }
+    for i.buckets[i.currentIndex].state != BucketOccupied {
+        i.currentIndex++
+    }
+    bucket := &i.buckets[i.currentIndex]
+    i.currentIndex++
+    i.numVisitedBuckets++
+    return bucket
 }
