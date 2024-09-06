@@ -18,7 +18,7 @@ func TestStringDiff(t *testing.T) {
 	limit := 3
 	for _, word := range words {
 
-		distance := levenstein(word, queryWord)
+		distance := Levenstein(word, queryWord)
 		if distance > limit {
 			continue
 		}
