@@ -1,14 +1,17 @@
 package main
 
-func Min3i(a, b, c int) int {
-	min := a
-	if b < min {
-		min = b
-	}
-	if c < min {
-		min = c
-	}
-	return min
+func Min(elements ...int) int {
+    if (len(elements) == 0) {
+        panic("Min called with 0 elements")
+    }
+
+    min := elements[0]
+    for _, element := range elements {
+        if (element < min) {
+            min = element
+        }
+    }
+    return min
 }
 
 func EditDistance(word1 []rune, word2 []rune) int {
@@ -34,7 +37,7 @@ func EditDistance(word1 []rune, word2 []rune) int {
 				substitutionCost = 1
 			}
 
-			dp[i*n+j] = Min3i(dp[(i-1)*n+j]+1, // deletion
+			dp[i*n+j] = Min(dp[(i-1)*n+j]+1, // deletion
 				dp[i*n+j-1]+1,                    // insertion
 				dp[(i-1)*n+j-1]+substitutionCost) // substitution
 
