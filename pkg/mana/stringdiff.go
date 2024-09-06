@@ -1,4 +1,4 @@
-package main
+package mana
 
 func Min(elements ...int) int {
     if (len(elements) == 0) {

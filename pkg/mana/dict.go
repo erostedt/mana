@@ -1,4 +1,4 @@
-package main
+package mana
 
 import (
 	"errors"
