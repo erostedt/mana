@@ -11,7 +11,7 @@ func Min3i(a, b, c int) int {
 	return min
 }
 
-func Levenstein(word1 []rune, word2 []rune) int {
+func EditDistance(word1 []rune, word2 []rune) int {
 	m := len(word1)
 	n := len(word2)
 	dp := make([]int, (m+1)*(n+1))
