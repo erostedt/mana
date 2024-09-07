@@ -14,37 +14,51 @@ func Min(elements ...int) int {
     return min
 }
 
+func MakeMatrix[T any](rows, cols int) [][]T {
+	matrix := make([][]T, rows)
+    for i := range matrix {
+        matrix[i] = make([]T, cols)
+    }
+    return matrix
+}
+
+
 func EditDistance(word1 []rune, word2 []rune) int {
-	m := len(word1)
-	n := len(word2)
-	dp := make([]int, (m+1)*(n+1))
+	rows := len(word1)
+	cols := len(word2)
 
-	dp[0] = 0
-	for i := 1; i < m+1; i++ {
-		dp[i*n] = i
+    if rows == 0 {
+        return cols
+    }
+    if cols == 0 {
+        return rows
+    }
+
+    dp := MakeMatrix[int](rows+1, cols+1)
+	for r := 0; r <= rows; r++ {
+		dp[r][0] = r
 	}
 
-	for j := 1; j < n+1; j++ {
-		dp[j] = j
+	for c := 0; c <= cols; c++ {
+		dp[0][c] = c
 	}
 
-	substitutionCost := 0
-	for i := 1; i < m+1; i++ {
-		for j := 1; j < n+1; j++ {
-			if word1[i-1] == word2[j-1] {
-				substitutionCost = 0
+	for r := 1; r <= rows; r++ {
+		for c := 1; c <= cols; c++ {
+			if word1[r-1] == word2[c-1] {
+                dp[r][c] = dp[r-1][c-1]
 			} else {
-				substitutionCost = 1
+                dp[r][c] = 1 + Min(
+                    dp[r-1][c],   // deletion
+                    dp[r][c-1],   // insertion
+                    dp[r-1][c-1]) // substitution
 			}
 
-			dp[i*n+j] = Min(dp[(i-1)*n+j]+1, // deletion
-				dp[i*n+j-1]+1,                    // insertion
-				dp[(i-1)*n+j-1]+substitutionCost) // substitution
 
 		}
 	}
 
-	return dp[m*n-1]
+	return dp[rows][cols]
 }
 
 type Match struct {
