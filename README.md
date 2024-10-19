@@ -1,7 +1,5 @@
 mana is a small project regarding edit_distances/stringdiff and autocomplete.
 
-This project is not intended for any professional use, but it is free to use by whomever wants to.
-
 The main package is in pkg/mana and contains:
  - deque.go -> Implementation of a double ended queue. (This comes shipped with go as list.List, but I wanted to make my own)
  - dict.go  -> Implementation of a dictionary/hashmap. (This comes shipped with go as map      , but I wanted to make my own)
